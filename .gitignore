@@ -40,3 +40,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# custom
+**/dist
+**/.vscode
+**/.pgdata
+**/.pgdata-test

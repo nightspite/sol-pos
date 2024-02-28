@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  # DATABASES
+  postgres:
+    restart: unless-stopped
+    image: postgres:15
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+      - ./.pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  # postgres-test:
+  #   restart: unless-stopped
+  #   image: postgres:15
+  #   volumes:
+  #     - ./postgres-test:/docker-entrypoint-initdb.d
+  #     - ./.pgdata-test:/var/lib/postgresql/data
+  #   ports:
+  #     - 5433:5432
+  #   environment:
+  #     POSTGRES_DB: postgres
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
