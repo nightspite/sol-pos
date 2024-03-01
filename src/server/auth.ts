@@ -20,15 +20,11 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+      username: string;
+      name: string | null;
+      role: "ADMIN" | "CASHIER" | "USER";
+    }
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -81,20 +77,43 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/signin",
-    // signOut: "/signout",
     error: "/signin",
+    // signOut: "/signout",
     // verifyRequest: "/auth/verify-request",
   },
   callbacks: {
-    session: ({ session, token }) => {
+    session: async ({session, token}) => {
+
+      const user = await db.query.users.findFirst({
+        where: (u) => eq(u.id, token?.sub ?? ''),
+      });
+
+      console.log('user', user);
+
+      if (!user) {
+        return session;
+        // return null;
+      }
+
+      const { password, ...rest } = user;
+
       return {
         ...session,
         user: {
           ...session.user,
-          id: token?.sub,
+          ...rest,
         }
       };
     },
+    // jwt(data) {
+    //   console.log('jwt', data);
+
+    //   return data.token;
+    // },
+    // signIn(data) {
+    //   console.log('signIn', data);
+    //   return true;
+    // }
   },
   session: {
     strategy: "jwt",

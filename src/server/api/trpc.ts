@@ -89,7 +89,7 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx?.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
@@ -98,4 +98,25 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
       session: { ...ctx.session, user: ctx.session.user },
     },
   });
+});
+
+/**
+ * Admin procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users with the role "ADMIN",
+ * use this. It verifies the session is valid and guarantees `ctx.session.user` is not null and that
+ * the user's role is "ADMIN".
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session?.user.role !== "ADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next({ ctx });
+});
+
+export const cashierProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session?.user.role !== "CASHIER" && ctx.session?.user.role !== "ADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next({ ctx });
 });
