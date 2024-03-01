@@ -1,17 +1,14 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getCsrfToken } from "next-auth/react";
-import { SigninMessage } from "@/lib/sign-message";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { createTable } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
+import { hashPassword } from "@/lib/hash";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -34,85 +31,80 @@ declare module "next-auth" {
   // }
 }
 
-export const providers: NextAuthOptions['providers'] = [
-  CredentialsProvider({
-    name: "Solana",
-    credentials: {
-      message: {
-        label: "Message",
-        type: "text",
-      },
-      signature: {
-        label: "Signature",
-        type: "text",
-      },
-    },
-    async authorize(credentials, req) {
-      try {
-        const signinMessage = new SigninMessage(
-          JSON.parse(credentials?.message ?? "{}") as SigninMessage
-        );
-        const nextAuthUrl = new URL(env.NEXTAUTH_URL);
-        if (signinMessage.domain !== nextAuthUrl.host) {
-          return null;
-        }
-
-        const csrfToken = await getCsrfToken({ req: { ...req, body: null } });
-
-        if (signinMessage.nonce !== csrfToken) {
-          return null;
-        }
-
-        const validationResult = await signinMessage.validate(
-          credentials?.signature ?? ""
-        );
-
-        if (!validationResult)
-          throw new Error("Could not validate the signed message");
-
-        return {
-          id: signinMessage.publicKey,
-        };
-      } catch (e) {
-        return null;
-      }
-    },
-  }),
-  /**
-   * ...add more providers here.
-   *
-   * Most other providers require a bit more work than the Discord provider. For example, the
-   * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-   * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-   *
-   * @see https://next-auth.js.org/providers/github
-   */
-];
-
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  callbacks: {
-    session: ({ session, token }) => ({
-      session: {...session,
-        publicKey: token.sub,
+  providers: [
+    CredentialsProvider({
+      id: "credentials",
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
       },
-      expires: session.expires,
-      user: {
-        ...session.user,
-        name: token.sub,
+      async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) {
+          // return null;
+          throw new Error("Invalid credentials");
+        }
+
+        const user = await db.query.users.findFirst({
+          where: (u) => eq(u.username, credentials?.username ?? ''),
+        });
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        if (user.password !== hashPassword(credentials?.password)) {
+          throw new Error("Invalid password");
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...rest } = user;
+
+        return {...rest}
       },
     }),
+    /**
+     * ...add more providers here.
+     *
+     * Most other providers require a bit more work than the Discord provider. For example, the
+     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
+     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
+     *
+     * @see https://next-auth.js.org/providers/github
+     */
+  ],
+  pages: {
+    signIn: "/signin",
+    // signOut: "/signout",
+    error: "/signin",
+    // verifyRequest: "/auth/verify-request",
+  },
+  callbacks: {
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token?.sub,
+        }
+      };
+    },
   },
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 1 day
   },
+  // jwt: {
+  //   maxAge: 24 * 60 * 60, // 1 day
+  // },
   secret: env.NEXTAUTH_SECRET,
-  adapter: DrizzleAdapter(db, createTable) as Adapter,
-  providers,
+  // adapter: DrizzleAdapter(db, createTable) as Adapter,
 };
 
 /**

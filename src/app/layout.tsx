@@ -3,10 +3,10 @@ import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import Header from "@/app/_components/header";
-import { AuthProvider } from "@/app/providers/auth-provider";
+import { AuthProvider } from "@/app/components/providers/auth-provider";
 import { getServerAuthSession } from "@/server/auth";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,14 +30,15 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "bg-background min-h-screen font-sans antialiased",
+          "min-h-screen bg-background font-sans antialiased",
+          // "bg-gradient-to-br from-green-50 to-green-200",
           inter.variable,
         )}
       >
         <TRPCReactProvider>
           <AuthProvider session={session}>
-            <Header />
             {children}
+            <Toaster />
           </AuthProvider>
         </TRPCReactProvider>
       </body>
