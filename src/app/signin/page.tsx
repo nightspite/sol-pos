@@ -28,12 +28,9 @@ import { FRONTEND_ROUTES } from "@/lib/routes";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { ShieldAlertIcon } from "lucide-react";
 import { useEffect } from "react";
+import { signinSchema } from "@/schemas/user";
 
-const schema = z.object({
-  username: z.string().min(4),
-  password: z.string().min(8).max(50),
-});
-type FormType = z.infer<typeof schema>;
+type FormType = z.infer<typeof signinSchema>;
 
 export default function Page() {
   const router = useRouter();
@@ -50,7 +47,7 @@ export default function Page() {
   const error = searchParams?.get("error");
 
   const form = useForm<FormType>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(signinSchema),
   });
 
   return (

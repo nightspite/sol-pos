@@ -9,6 +9,7 @@ import { env } from "@/env";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { hashPassword } from "@/lib/hash";
+import { api } from "@/trpc/server";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -22,7 +23,7 @@ declare module "next-auth" {
       id: string;
       username: string;
       name: string | null;
-      role: "ADMIN" | "CASHIER" | "USER";
+      role: "ADMIN" | "CASHIER";
     }
   }
 }
@@ -47,7 +48,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const user = await db.query.users.findFirst({
+        const user = await db.query.userTable.findFirst({
           where: (u) => eq(u.username, credentials?.username ?? ''),
         });
 
@@ -84,11 +85,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     session: async ({session, token}) => {
 
-      const user = await db.query.users.findFirst({
+      const user = await db.query.userTable.findFirst({
         where: (u) => eq(u.id, token?.sub ?? ''),
       });
-
-      console.log('user', user);
 
       if (!user) {
         return session;

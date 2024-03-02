@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/app/components/ui/button";
-import { z } from "zod";
+import { type z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -28,13 +28,10 @@ import {
 } from "../components/ui/card";
 import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
+import { createUserSchema } from "@/schemas/user";
+import { FullscreenMessage } from "../components/fullscreen-message";
 
-const schema = z.object({
-  name: z.string().min(1),
-  username: z.string().min(4),
-  password: z.string().min(8).max(50),
-});
-type FormType = z.infer<typeof schema>;
+type FormType = z.infer<typeof createUserSchema>;
 
 export default function Page() {
   const router = useRouter();
@@ -50,7 +47,7 @@ export default function Page() {
   const callbackUrl = searchParams?.get("callbackUrl");
 
   const form = useForm<FormType>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(createUserSchema),
   });
 
   const { mutate } = api.user.signup.useMutation({
@@ -68,6 +65,13 @@ export default function Page() {
       });
     },
   });
+
+  return (
+    <FullscreenMessage>
+      For now the only way to create a new account is <br />
+      to use the admin panel.
+    </FullscreenMessage>
+  );
 
   return (
     <Form {...form}>

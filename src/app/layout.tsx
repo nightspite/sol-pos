@@ -38,7 +38,7 @@ export default async function RootLayout({
         <TRPCReactProvider>
           <AuthProvider session={session}>
             {children}
-            <Toaster />
+            <Toaster richColors />
           </AuthProvider>
         </TRPCReactProvider>
       </body>
