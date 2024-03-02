@@ -61,17 +61,35 @@ export const userRouter = createTRPCRouter({
     }),
 
   updateMe: protectedProcedure.input(updateMeSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.update(userTable).set({
+    const [updatedUser] = await ctx.db.update(userTable).set({
       name: input.name,
     }).where(eq(userTable.id, ctx.session.user.id)).returning();
+
+    if (!updatedUser) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update user",
+      });
+    }
+
+    return updatedUser;
   }),
 
   updatePassword: protectedProcedure.input(z.object({
     password: z.string(),
   })).mutation(async ({ ctx, input }) => {
-    await ctx.db.update(userTable).set({
+    const updatedUser = await ctx.db.update(userTable).set({
       password: hashPassword(input.password),
-    }).where(eq(userTable.id, ctx.session.user.id));
+    }).where(eq(userTable.id, ctx.session.user.id)).returning();
+
+    if (!updatedUser) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update password",
+      });
+    }
+
+    return updatedUser;
   }),
 
   // *****
@@ -171,6 +189,15 @@ export const userRouter = createTRPCRouter({
   deleteUser: adminProcedure.input(z.object({
     id: z.string(),
   })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.delete(userTable).where(eq(userTable.id, input.id)).returning();
+    const [deletedUser] = await ctx.db.delete(userTable).where(eq(userTable.id, input.id)).returning();
+
+    if (!deletedUser) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to delete user",
+      });
+    }
+
+    return deletedUser;
   }),
 });

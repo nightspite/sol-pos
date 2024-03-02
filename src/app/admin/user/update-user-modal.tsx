@@ -90,9 +90,9 @@ export function UpdateUserModal({ id, children }: DeleteUserModalProps) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{id ? "Update" : "Create"} User</DialogTitle>
+          <DialogTitle>Update User</DialogTitle>
           <DialogDescription>
-            {id ? "Update an existing users account." : "Create a new user."}
+            Update an existing users account.
           </DialogDescription>
         </DialogHeader>
 
@@ -164,7 +164,7 @@ export function UpdateUserModal({ id, children }: DeleteUserModalProps) {
             <DialogFooter>
               <Button type="submit">
                 <PlusIcon className="mr-2" size={16} />
-                {id ? "Update" : "Create"} User
+                Update User
               </Button>
             </DialogFooter>
           </form>

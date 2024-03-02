@@ -22,11 +22,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
-import { DeleteUserModal } from "./delete-user-modal";
 import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
-import { CreateUserModal } from "./create-user-modal";
-import { UpdateUserModal } from "./update-user-modal";
+import { DeleteStoreModal } from "./delete-store-modal";
+import { CreateStoreModal } from "./create-store-modal";
+import { UpdateStoreModal } from "./update-store-modal";
 
 export default function Page() {
   const [pagination, setPagination] = useState({
@@ -34,7 +34,7 @@ export default function Page() {
     pageSize: 10,
   });
 
-  const { data, isLoading } = api.user.getUserList.useQuery({
+  const { data, isLoading } = api.store.getStoreList.useQuery({
     limit: pagination.pageSize,
     offset: pagination.pageIndex * pagination.pageSize,
   });
@@ -42,14 +42,14 @@ export default function Page() {
   return (
     <div>
       <div className="mb-4 flex items-center gap-4">
-        <h1 className="text-3xl font-semibold">Users</h1>
+        <h1 className="text-3xl font-semibold">Stores</h1>
         <div className="ml-auto">
-          <CreateUserModal>
+          <CreateStoreModal>
             <Button>
               <PlusIcon className="mr-2" size={16} />
-              Create User
+              Create Store
             </Button>
-          </CreateUserModal>
+          </CreateStoreModal>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export default function Page() {
   );
 }
 
-type TableItem = RouterOutputs["user"]["getUserList"]["items"][0];
+type TableItem = RouterOutputs["store"]["getStoreList"]["items"][0];
 
 const COLUMS: ColumnDef<TableItem>[] = [
   {
@@ -80,11 +80,31 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Username",
-    accessorKey: "username",
+    header: "Number of users",
+    accessorKey: "users",
     cell: ({ row }) => {
       return (
-        <span className="font-medium">{row?.original?.username ?? "-"}</span>
+        <span className="font-medium">{row.original?.users?.length ?? 0}</span>
+      );
+    },
+  },
+  {
+    header: "Number of PoS",
+    accessorKey: "pos",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">{row.original?.pos?.length ?? 0}</span>
+      );
+    },
+  },
+  {
+    header: "Number of products",
+    accessorKey: "products",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">
+          {row.original?.products?.length ?? 0}
+        </span>
       );
     },
   },
@@ -111,15 +131,6 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Number of stores",
-    accessorKey: "stores",
-    cell: ({ row }) => {
-      return (
-        <span className="font-medium">{row.original?.stores?.length ?? 0}</span>
-      );
-    },
-  },
-  {
     header: "",
     accessorKey: "actions",
     cell: ({ row }) => {
@@ -134,39 +145,39 @@ const COLUMS: ColumnDef<TableItem>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <Link href={`${FRONTEND_ROUTES.ADMIN_USER}/${row.original?.id}`}>
+              <Link href={`${FRONTEND_ROUTES.ADMIN_STORE}/${row.original?.id}`}>
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
                   }}
                 >
                   <EyeIcon className="mr-2" size={16} />
-                  View User
+                  View Store
                 </DropdownMenuItem>
               </Link>
 
-              <UpdateUserModal id={row.original?.id}>
+              <UpdateStoreModal id={row.original?.id}>
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
                   }}
                 >
                   <PencilIcon className="mr-2" size={16} />
-                  Update User
+                  Update Store
                 </DropdownMenuItem>
-              </UpdateUserModal>
+              </UpdateStoreModal>
               <DropdownMenuSeparator />
 
-              <DeleteUserModal id={row.original?.id}>
+              <DeleteStoreModal id={row.original?.id}>
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
                   }}
                 >
                   <TrashIcon className="mr-2" size={16} />
-                  Delete User
+                  Delete Store
                 </DropdownMenuItem>
-              </DeleteUserModal>
+              </DeleteStoreModal>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

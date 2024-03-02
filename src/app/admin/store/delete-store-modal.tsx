@@ -14,20 +14,20 @@ import {
 } from "@/app/components/ui/alert-dialog";
 import { api } from "@/trpc/react";
 
-interface DeleteUserModalProps {
+interface DeleteStoreModalProps {
   id: string;
   children: React.ReactNode;
 }
 
-export function DeleteUserModal({ id, children }: DeleteUserModalProps) {
+export function DeleteStoreModal({ id, children }: DeleteStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const { mutate } = api.user.deleteUser.useMutation({
+  const { mutate } = api.store.deleteStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
-      await utils.user.getUserList.invalidate();
-      await utils.user.getUser.invalidate({
+      await utils.store.getStoreList.invalidate();
+      await utils.store.getStore.invalidate({
         id: data.id,
       });
     },
@@ -42,7 +42,7 @@ export function DeleteUserModal({ id, children }: DeleteUserModalProps) {
           <AlertDialogDescription>
             This action cannot be undone.
             <br />
-            This will permanently delete the user.
+            This will permanently delete the store.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

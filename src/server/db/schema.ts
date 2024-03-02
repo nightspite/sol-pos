@@ -90,7 +90,8 @@ export const storeTable = createTable(
 export const storeRelations = relations(storeTable, ({ many }) => ({
   pos: many(posTable),
   users: many(userToStoreTable),
-  products: many(productToStoreTable)
+  products: many(productToStoreTable),
+  orders: many(orderTable)
 }));
 
 export const posTable = createTable(
@@ -106,22 +107,28 @@ export const posTable = createTable(
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
 );
 
 export const posRelations = relations(posTable, ({ one, many }) => ({
-  cart: many(cartTable),
   store: one(storeTable, {
     fields: [posTable.storeId],
     references: [storeTable.id],
-  })
+  }),
+  orders: many(orderTable)
 }));
 
-export const cartTable = createTable(
-  "cart",
+export const ORDER_STATUS_ARRAY = ["CART", "PAID", "CANCELLED"] as const;
+export const orderStatusEnum = pgEnum('orderStatusEnum', ORDER_STATUS_ARRAY);
+
+export const orderTable = createTable(
+  "order",
   {
     id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
+    storeId: varchar("storeId", { length: 255 }).notNull().references(() => storeTable.id),
     posId: varchar("posId", { length: 255 }).notNull().references(() => posTable.id),
+    status: orderStatusEnum('status').default('CART').notNull(),
 
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -132,19 +139,27 @@ export const cartTable = createTable(
   },
 );
 
-export const cartRelations = relations(cartTable, ({ one, many }) => ({
-  order: one(orderTable, {
-    fields: [cartTable.id],
-    references: [orderTable.cartId],
+export const orderRelations = relations(orderTable, ({ one, many }) => ({
+  store: one(storeTable, {
+    fields: [orderTable.storeId],
+    references: [storeTable.id],
   }),
-  items: many(cartItemTable),
+  pos: one(posTable, {
+    fields: [orderTable.posId],
+    references: [posTable.id],
+  }),
+  items: many(orderItemTable),
+  transaction: one(transactionTable, {
+    fields: [orderTable.id],
+    references: [transactionTable.orderId],
+  })
 }));
 
-export const cartItemTable = createTable(
-  "cart_item",
+export const orderItemTable = createTable(
+  "order_item",
   {
     id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
-    cartId: varchar("cartId", { length: 255 }).notNull().references(() => cartTable.id),
+    orderId: varchar("orderId", { length: 255 }).notNull().references(() => orderTable.id),
     productId: varchar("productId", { length: 255 }).notNull().references(() => productTable.id),
     quantity: varchar("quantity", { length: 255 }).notNull(),
 
@@ -157,40 +172,13 @@ export const cartItemTable = createTable(
   },
 );
 
-export const cartItemRelations = relations(cartItemTable, ({ one }) => ({
+export const orderItemRelations = relations(orderItemTable, ({ one }) => ({
   product: one(productTable, {
-    fields: [cartItemTable.productId],
+    fields: [orderItemTable.productId],
     references: [productTable.id],
   }),
 }));
 
-export const orderTable = createTable(
-  "order",
-  {
-    id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
-    cartId: varchar("cartId", { length: 255 }).notNull().references(() => cartTable.id),
-    signature: text("signature"),
-    block: text("block"),
-    timestamp: timestamp("timestamp"),
-    result: text("result"),
-    signer: text("signer"),
-
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-);
-
-export const orderRelations = relations(orderTable, ({ one, many }) => ({
-  items: many(orderItemTable),
-  transaction: one(transactionTable, {
-    fields: [orderTable.id],
-    references: [transactionTable.orderId],
-  })
-}));
 
 export const TRANSACTION_STATUS_ARRAY = ["SUCCESS", "FAILURE", "FINALIZED"] as const;
 export const transactionStatusEnum = pgEnum('transactionStatusEnum', TRANSACTION_STATUS_ARRAY);
@@ -227,30 +215,6 @@ export const transactionRelations = relations(transactionTable, ({ one }) => ({
   }),
 }));
 
-export const orderItemTable = createTable(
-  "order_item",
-  {
-    id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
-    orderId: varchar("orderId", { length: 255 }).notNull().references(() => orderTable.id),
-    productId: varchar("productId", { length: 255 }).notNull().references(() => productTable.id),
-    quantity: varchar("quantity", { length: 255 }).notNull(),
-
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-);
-
-export const orderItemRelations = relations(orderItemTable, ({ one }) => ({
-  product: one(productTable, {
-    fields: [orderItemTable.productId],
-    references: [productTable.id],
-  }),
-}));
-
 export const productTable = createTable(
   "product",
   {
@@ -264,6 +228,7 @@ export const productTable = createTable(
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    deletedAt: timestamp("deleted_at"),
   },
 );
 
@@ -277,6 +242,7 @@ export const productToStoreTable = createTable(
   {
     productId: varchar("productId", { length: 255 }).notNull().references(() => productTable.id),
     storeId: varchar("storeId", { length: 255 }).notNull().references(() => storeTable.id),
+    quantity: integer("quantity").notNull(),
 
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)

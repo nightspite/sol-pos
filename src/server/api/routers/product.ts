@@ -60,22 +60,4 @@ export const productRouter = createTRPCRouter({
       };
     });
   }),
-
-  assignProductToStore: adminProcedure.input(z.object({
-    productId: z.string(),
-    storeId: z.string(),
-  })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.insert(productToStoreTable).values({
-      productId: input.productId,
-      storeId: input.storeId,
-    }).returning();
-  }),
-
-  removeProductFromStore: adminProcedure.input(z.object({
-    productId: z.string(),
-    storeId: z.string(),
-  })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.delete(productToStoreTable)
-      .where(and(eq(productToStoreTable.productId, input.productId), eq(productToStoreTable.storeId, input.storeId))).returning();
-  }),
 });
