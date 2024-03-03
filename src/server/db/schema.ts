@@ -162,6 +162,7 @@ export const orderItemTable = createTable(
     orderId: varchar("orderId", { length: 255 }).notNull().references(() => orderTable.id),
     productId: varchar("productId", { length: 255 }).notNull().references(() => productTable.id),
     quantity: varchar("quantity", { length: 255 }).notNull(),
+    price: integer("price").notNull(), // in cents
 
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -176,6 +177,10 @@ export const orderItemRelations = relations(orderItemTable, ({ one }) => ({
   product: one(productTable, {
     fields: [orderItemTable.productId],
     references: [productTable.id],
+  }),
+  order: one(orderTable, {
+    fields: [orderItemTable.orderId],
+    references: [orderTable.id],
   }),
 }));
 
