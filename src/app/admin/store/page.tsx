@@ -80,7 +80,7 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Number of users",
+    header: "No. users",
     accessorKey: "users",
     cell: ({ row }) => {
       return (
@@ -89,7 +89,7 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Number of PoS",
+    header: "No. PoS",
     accessorKey: "pos",
     cell: ({ row }) => {
       return (
@@ -98,7 +98,7 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Number of products",
+    header: "No. products",
     accessorKey: "products",
     cell: ({ row }) => {
       return (

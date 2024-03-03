@@ -4,6 +4,7 @@ import {
   createTRPCRouter,
 } from "@/server/api/trpc";
 import { posTable, storeTable } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
 import { type SQL, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
@@ -12,29 +13,19 @@ export const posRouter = createTRPCRouter({
     storeId: z.string(),
     name: z.string(),
   })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.insert(posTable).values({
+    const [createdPos] = await ctx.db.insert(posTable).values({
       storeId: input.storeId,
       name: input.name,
     }).returning();
-  }),
 
-  updatePos: adminProcedure.input(z.object({
-    id: z.string(),
-    name: z.string(),
-  })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.update(posTable).set({
-      name: input.name,
-    }).where(eq(posTable.id, input.id)).returning();
-  }),
+    if (!createdPos) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Pos not found",
+      });
+    }
 
-  deletePos: adminProcedure.input(z.object({
-    id: z.string(),
-  })).mutation(async ({ ctx, input }) => {
-    return await ctx.db.delete(posTable).where(eq(posTable.id, input.id)).returning();
-  }),
-
-  getAllPos: adminProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.posTable.findMany();
+    return createdPos;
   }),
 
   getPos: cashierProcedure.input(z.object({

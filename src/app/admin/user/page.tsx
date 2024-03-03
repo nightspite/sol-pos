@@ -89,7 +89,7 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
-    header: "Number of stores",
+    header: "No. stores",
     accessorKey: "stores",
     cell: ({ row }) => {
       return (

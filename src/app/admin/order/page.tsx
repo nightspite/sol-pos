@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/app/components/ui/button";
-import {
-  EyeIcon,
-  MoreHorizontalIcon,
-  PencilIcon,
-  PlusIcon,
-  TrashIcon,
-} from "lucide-react";
+import { EyeIcon, MoreHorizontalIcon } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useState } from "react";
 import { DataTable } from "@/app/components/ui/data-table";
@@ -19,14 +13,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
-import { DeleteProductModal } from "./delete-product-modal";
 import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
-import { CreateProductModal } from "./create-product-modal";
-import { UpdateProductModal } from "./update-product-modal";
 import { formatMoney } from "@/lib/money";
 
 export default function Page() {
@@ -35,7 +25,7 @@ export default function Page() {
     pageSize: 10,
   });
 
-  const { data, isLoading } = api.product.getProductList.useQuery({
+  const { data, isLoading } = api.order.getOrderList.useQuery({
     limit: pagination.pageSize,
     offset: pagination.pageIndex * pagination.pageSize,
   });
@@ -43,15 +33,7 @@ export default function Page() {
   return (
     <div>
       <div className="mb-4 flex items-center gap-4">
-        <h1 className="text-3xl font-semibold">Products</h1>
-        <div className="ml-auto">
-          <CreateProductModal>
-            <Button>
-              <PlusIcon className="mr-2" size={16} />
-              Create Product
-            </Button>
-          </CreateProductModal>
-        </div>
+        <h1 className="text-3xl font-semibold">Orders</h1>
       </div>
 
       <DataTable
@@ -70,34 +52,48 @@ export default function Page() {
   );
 }
 
-type TableItem = RouterOutputs["product"]["getProductList"]["items"][0];
+type TableItem = RouterOutputs["order"]["getOrderList"]["items"][0];
 
 const COLUMS: ColumnDef<TableItem>[] = [
   {
-    header: "Name",
-    accessorKey: "name",
+    header: "ID",
+    accessorKey: "id",
     cell: ({ row }) => {
-      return <span className="font-medium">{row?.original?.name ?? "-"}</span>;
+      return <span className="font-medium">{row?.original?.id ?? "-"}</span>;
     },
   },
   {
-    header: "Price",
-    accessorKey: "price",
+    header: "Status",
+    accessorKey: "status",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">{row?.original?.status ?? "-"}</span>
+      );
+    },
+  },
+  {
+    header: "No. items",
+    accessorKey: "items",
     cell: ({ row }) => {
       return (
         <span className="font-medium">
-          {row?.original?.price ? formatMoney(row?.original?.price) : "-"}
+          {row?.original?.items?.length ?? "-"}
         </span>
       );
     },
   },
   {
-    header: "No. stores",
-    accessorKey: "stores",
+    header: "Sum",
+    accessorKey: "sum",
     cell: ({ row }) => {
+      const sum = row?.original?.items?.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0,
+      );
+
       return (
         <span className="font-medium">
-          {row?.original?.stores?.length ?? "-"}
+          {(row?.original?.items || [])?.length > 0 ? formatMoney(sum) : "-"}
         </span>
       );
     },
@@ -139,8 +135,18 @@ const COLUMS: ColumnDef<TableItem>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <Link href={`${FRONTEND_ROUTES.ADMIN_ORDER}/${row.original?.id}`}>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <EyeIcon className="mr-2" size={16} />
+                  View Order
+                </DropdownMenuItem>
+              </Link>
               <Link
-                href={`${FRONTEND_ROUTES.ADMIN_PRODUCT}/${row.original?.id}`}
+                href={`${FRONTEND_ROUTES.ADMIN_STORE}/${row.original?.storeId}`}
               >
                 <DropdownMenuItem
                   onSelect={(e) => {
@@ -148,32 +154,9 @@ const COLUMS: ColumnDef<TableItem>[] = [
                   }}
                 >
                   <EyeIcon className="mr-2" size={16} />
-                  View Product
+                  View Store
                 </DropdownMenuItem>
               </Link>
-
-              <UpdateProductModal id={row.original?.id}>
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <PencilIcon className="mr-2" size={16} />
-                  Update Product
-                </DropdownMenuItem>
-              </UpdateProductModal>
-              <DropdownMenuSeparator />
-
-              <DeleteProductModal id={row.original?.id}>
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <TrashIcon className="mr-2" size={16} />
-                  Delete Product
-                </DropdownMenuItem>
-              </DeleteProductModal>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
