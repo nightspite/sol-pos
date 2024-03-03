@@ -19,7 +19,6 @@ import {
 // export const createTable = pgTableCreator((name) => `sol-pos_${name}`);
 export const createTable = pgTableCreator((name) => `${name}`);
 
-
 export const userRoleEnum = pgEnum('userRoleEnum', USER_ROLE_ARRAY);
 
 export const userTable = createTable(
@@ -161,7 +160,7 @@ export const orderItemTable = createTable(
     id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
     orderId: varchar("orderId", { length: 255 }).notNull().references(() => orderTable.id),
     productId: varchar("productId", { length: 255 }).notNull().references(() => productTable.id),
-    quantity: varchar("quantity", { length: 255 }).notNull(),
+    quantity: integer("quantity").notNull(),
     price: integer("price").notNull(), // in cents
 
     createdAt: timestamp("created_at")
@@ -185,8 +184,8 @@ export const orderItemRelations = relations(orderItemTable, ({ one }) => ({
 }));
 
 
-export const TRANSACTION_STATUS_ARRAY = ["SUCCESS", "FAILURE", "FINALIZED"] as const;
-export const transactionStatusEnum = pgEnum('transactionStatusEnum', TRANSACTION_STATUS_ARRAY);
+// export const TRANSACTION_STATUS_ARRAY = ["SUCCESS", "FAILURE", "FINALIZED"] as const;
+// export const transactionStatusEnum = pgEnum('transactionStatusEnum', TRANSACTION_STATUS_ARRAY);
 
 export const transactionTable = createTable(
   "transaction",
