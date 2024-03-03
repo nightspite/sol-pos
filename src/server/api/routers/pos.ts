@@ -33,6 +33,10 @@ export const posRouter = createTRPCRouter({
     return await ctx.db.delete(posTable).where(eq(posTable.id, input.id)).returning();
   }),
 
+  getAllPos: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.posTable.findMany();
+  }),
+
   getPos: cashierProcedure.input(z.object({
     id: z.string(),
   })).query(async ({ ctx, input }) => {

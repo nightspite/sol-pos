@@ -126,6 +126,10 @@ export const userRouter = createTRPCRouter({
       return { ...rest };
     }),
 
+  getAllUsers: adminProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.userTable.findMany();
+  }),
+
   getUserList: adminProcedure.input(z.object({
     limit: z.number().default(10),
     offset: z.number().default(0),

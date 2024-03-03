@@ -26,6 +26,7 @@ import {
 import { Button } from "@/app/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
+import { toast } from "sonner";
 
 interface DeleteStoreModalProps {
   children: React.ReactNode;
@@ -43,6 +44,12 @@ export function CreateStoreModal({ children }: DeleteStoreModalProps) {
       await utils.store.getStoreList.invalidate();
       await utils.store.getStore.invalidate({
         id: data.id,
+      });
+      toast.success("Store created");
+    },
+    onError: (error) => {
+      toast.error("Crete store failes.", {
+        description: error?.message,
       });
     },
   });

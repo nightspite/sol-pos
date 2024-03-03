@@ -8,7 +8,7 @@ export const FRONTEND_ROUTES = {
   
   ADMIN_PRODUCT: "/admin/product",
   ADMIN_STORE: "/admin/store",
-  ADMIN_POS: "/admin/pos",
+  // ADMIN_POS: "/admin/pos",
 
   ADMIN_CART: "/admin/cart",
   ADMIN_ORDER: "/admin/order",

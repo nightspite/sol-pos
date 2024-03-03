@@ -37,15 +37,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+import { toast } from "sonner";
 
-interface DeleteUserModalProps {
+interface UpdateUserModalProps {
   id?: string;
   children: React.ReactNode;
 }
 
 type FormType = z.infer<typeof updateUserSchema>;
 
-export function UpdateUserModal({ id, children }: DeleteUserModalProps) {
+export function UpdateUserModal({ id, children }: UpdateUserModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -65,6 +66,12 @@ export function UpdateUserModal({ id, children }: DeleteUserModalProps) {
           id: data.id,
         });
       }
+      toast.success("User updated");
+    },
+    onError: (error) => {
+      toast.error("User update failed.", {
+        description: error?.message,
+      });
     },
   });
 

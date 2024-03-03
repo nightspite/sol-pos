@@ -19,11 +19,12 @@ export const unassignUserToStoreSchema = assignUserToStoreSchema;
 
 export const assignPosToStoreSchema = z.object({
   storeId: z.string(),
-  posId: z.string(),
+  name: z.string()
 });
 
-export const unassignPosToStoreSchema = assignPosToStoreSchema.pick({
-  posId: true,
+export const unassignPosToStoreSchema = z.object({
+  storeId: z.string(),
+  posId: z.string(),
 });
 
 export const assignProductToStoreSchema = z.object({

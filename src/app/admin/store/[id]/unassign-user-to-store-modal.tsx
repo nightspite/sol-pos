@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,29 +13,39 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/app/components/ui/alert-dialog";
-import { api } from "@/trpc/react";
 import { toast } from "sonner";
 
-interface DeleteStoreModalProps {
-  id: string;
+interface UnassignUserToStoreModalProps {
+  storeId: string;
+  userId: string;
   children: React.ReactNode;
 }
 
-export function DeleteStoreModal({ id, children }: DeleteStoreModalProps) {
+export function UnassignUserToStoreModal({
+  storeId,
+  userId,
+  children,
+}: UnassignUserToStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const { mutate } = api.store.deleteStore.useMutation({
+  const { mutate } = api.store.unassignUserToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
+      await utils.user.getAllUsers.invalidate();
+      await utils.user.getUserList.invalidate();
+      await utils.user.getUser.invalidate({
+        id: data?.userId,
+      });
+
       await utils.store.getStoreList.invalidate();
       await utils.store.getStore.invalidate({
-        id: data.id,
+        id: storeId,
       });
-      toast.success("Store deleted");
+      toast.success("User unassigned");
     },
     onError: (error) => {
-      toast.error("Store delte failed.", {
+      toast.error("User unassign failed.", {
         description: error?.message,
       });
     },
@@ -49,17 +60,17 @@ export function DeleteStoreModal({ id, children }: DeleteStoreModalProps) {
           <AlertDialogDescription>
             This action cannot be undone.
             <br />
-            This will permanently delete the store.
+            This will permanently unassign the user from the store.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              mutate({ id });
+              mutate({ storeId, userId });
             }}
           >
-            Delete
+            Unnasign
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

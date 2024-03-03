@@ -12,7 +12,6 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import { createStoreSchema, type updateStoreSchema } from "@/schemas/store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -25,54 +24,54 @@ import {
 } from "@/app/components/ui/form";
 import { Button } from "@/app/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { Input } from "@/app/components/ui/input";
+import { assignPosToStoreSchema } from "@/schemas/store";
 import { toast } from "sonner";
+import { Input } from "@/app/components/ui/input";
 
-interface DeleteStoreModalProps {
-  id?: string;
+interface AssignPosToStoreModalProps {
+  storeId: string;
   children: React.ReactNode;
 }
 
-type FormType = z.infer<typeof updateStoreSchema>;
+type FormType = z.infer<typeof assignPosToStoreSchema>;
 
-export function UpdateStoreModal({ id, children }: DeleteStoreModalProps) {
+export function AssignPosToStoreModal({
+  storeId,
+  children,
+}: AssignPosToStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const { data } = api.store.getStore.useQuery(
-    { id: id ?? "" },
-    {
-      enabled: !!id,
-    },
-  );
+  const { data: store } = api.store.getStore.useQuery({
+    id: storeId,
+  });
 
-  const { mutate } = api.store.updateStore.useMutation({
+  const { mutate } = api.store.assignPosToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
+      await utils.pos.getAllPos.invalidate();
+      await utils.pos.getPos.invalidate({
+        id: data?.id,
+      });
+
       await utils.store.getStoreList.invalidate();
-      if (data?.id) {
-        await utils.store.getStore.invalidate({
-          id: data.id,
-        });
-      }
-      toast.success("Store updated");
+      await utils.store.getStore.invalidate({
+        id: storeId,
+      });
+      toast.success("PoS assigned to store");
     },
     onError: (error) => {
-      toast.error("Store update failed.", {
+      toast.error("PoS assign failed.", {
         description: error?.message,
       });
     },
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(createStoreSchema),
+    resolver: zodResolver(assignPosToStoreSchema),
     defaultValues: {
-      id: data?.id ?? "",
-      name: data?.name ?? "",
-    },
-    values: {
-      id: data?.id ?? "",
-      name: data?.name ?? "",
+      storeId,
+      name: "",
     },
   });
 
@@ -82,8 +81,8 @@ export function UpdateStoreModal({ id, children }: DeleteStoreModalProps) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Store</DialogTitle>
-          <DialogDescription>Update the store details.</DialogDescription>
+          <DialogTitle>Create & Assign PoS to {store?.name}</DialogTitle>
+          <DialogDescription>Store id {store?.id}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -110,7 +109,7 @@ export function UpdateStoreModal({ id, children }: DeleteStoreModalProps) {
             <DialogFooter>
               <Button type="submit">
                 <PlusIcon className="mr-2" size={16} />
-                Update Store
+                Assign
               </Button>
             </DialogFooter>
           </form>

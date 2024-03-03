@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/app/components/ui/alert-dialog";
 import { api } from "@/trpc/react";
+import { toast } from "sonner";
 
 interface DeleteUserModalProps {
   id: string;
@@ -29,6 +30,12 @@ export function DeleteUserModal({ id, children }: DeleteUserModalProps) {
       await utils.user.getUserList.invalidate();
       await utils.user.getUser.invalidate({
         id: data.id,
+      });
+      toast.success("User deleted");
+    },
+    onError: (error) => {
+      toast.error("User delete failed.", {
+        description: error?.message,
       });
     },
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,6 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import { USER_ROLE_ARRAY, createUserSchema } from "@/schemas/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -25,7 +24,6 @@ import {
 } from "@/app/components/ui/form";
 import { Button } from "@/app/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { Input } from "@/app/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -33,43 +31,63 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+import { assignUserToStoreSchema } from "@/schemas/store";
 import { toast } from "sonner";
 
-interface CreateUserModalProps {
+interface AssignUserToStoreModalProps {
+  storeId: string;
   children: React.ReactNode;
 }
 
-type FormType = z.infer<typeof createUserSchema>;
+type FormType = z.infer<typeof assignUserToStoreSchema>;
 
-export function CreateUserModal({ children }: CreateUserModalProps) {
+export function AssignUserToStoreModal({
+  storeId,
+  children,
+}: AssignUserToStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const { mutate } = api.user.createUser.useMutation({
+  const { data: store } = api.store.getStore.useQuery({
+    id: storeId,
+  });
+  const { data: users } = api.user.getAllUsers.useQuery();
+
+  const { mutate } = api.store.assignUserToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
+      await utils.user.getAllUsers.invalidate();
       await utils.user.getUserList.invalidate();
       await utils.user.getUser.invalidate({
-        id: data.id,
+        id: data?.userId,
       });
-      toast.success("User created");
+
+      await utils.store.getStoreList.invalidate();
+      await utils.store.getStore.invalidate({
+        id: storeId,
+      });
+      toast.success("User assigned to store");
     },
     onError: (error) => {
-      toast.error("User create failed.", {
+      toast.error("User assign failed.", {
         description: error?.message,
       });
     },
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(assignUserToStoreSchema),
     defaultValues: {
-      name: "",
-      username: "",
-      password: "",
-      role: "CASHIER",
+      storeId,
+      userId: "",
     },
   });
+
+  const unnasignedUsers = useMemo(() => {
+    return users?.filter(
+      (u) => !store?.users?.some((su) => su?.userId === u?.id),
+    );
+  }, [store?.users, users]);
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
@@ -77,8 +95,8 @@ export function CreateUserModal({ children }: CreateUserModalProps) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
-          <DialogDescription>Create a new user.</DialogDescription>
+          <DialogTitle>Assign user to {store?.name}</DialogTitle>
+          <DialogDescription>Store id {store?.id}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -90,54 +108,10 @@ export function CreateUserModal({ children }: CreateUserModalProps) {
           >
             <FormField
               control={form.control}
-              name="name"
+              name="userId"
               render={({ field }) => (
                 <FormItem className="">
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input type="text" {...field} placeholder="Name" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem className="">
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input type="text" {...field} placeholder="Username" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="">
-                  <FormLabel className="flex w-full items-baseline">
-                    Password
-                  </FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} placeholder="Password" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem className="">
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>User</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={(v) => {
@@ -146,12 +120,12 @@ export function CreateUserModal({ children }: CreateUserModalProps) {
                       value={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Pick role" />
+                        <SelectValue placeholder="Pick user" />
                       </SelectTrigger>
                       <SelectContent>
-                        {USER_ROLE_ARRAY?.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role}
+                        {(unnasignedUsers ?? [])?.map((user) => (
+                          <SelectItem key={user?.id} value={user?.id}>
+                            {user?.name} ({user?.username})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -165,7 +139,7 @@ export function CreateUserModal({ children }: CreateUserModalProps) {
             <DialogFooter>
               <Button type="submit">
                 <PlusIcon className="mr-2" size={16} />
-                Create User
+                Assign
               </Button>
             </DialogFooter>
           </form>

@@ -115,52 +115,159 @@ export const storeRouter = createTRPCRouter({
   }),
 
   assignUserToStore: adminProcedure.input(assignUserToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.insert(userToStoreTable).values({
+    const userToStore = await ctx.db.query.userToStoreTable.findFirst({
+      where: and(
+        eq(userToStoreTable.storeId, input.storeId),
+        eq(userToStoreTable.userId, input.userId),
+      ),
+    });
+
+    if (userToStore) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "User already assigned to store",
+      });
+    }
+
+    const [createdUserToStore] = await ctx.db.insert(userToStoreTable).values({
       storeId: input.storeId,
       userId: input.userId,
     }).returning();
+
+    if (!createdUserToStore) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to assign user to store",
+      });
+    }
+
+    return createdUserToStore;
   }),
 
   unassignUserToStore: adminProcedure.input(unassignUserToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.delete(userToStoreTable).where(and(
+    const [deleteUserToStore] = await ctx.db.delete(userToStoreTable).where(and(
       eq(userToStoreTable.storeId, input.storeId),
       eq(userToStoreTable.userId, input.userId),
     )).returning();
+
+    if (!deleteUserToStore) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to unassign user to store",
+      });
+    }
+
+    return deleteUserToStore;
   }),
 
   assignProductToStore: adminProcedure.input(assignProductToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.insert(productToStoreTable).values({
+    const productToStore = await ctx.db.query.productToStoreTable.findFirst({
+      where: and(
+        eq(productToStoreTable.storeId, input.storeId),
+        eq(productToStoreTable.productId, input.productId),
+      ),
+    });
+
+    if (productToStore) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Product already assigned to store",
+      });
+    }
+
+    const [createdProductToStore] = await ctx.db.insert(productToStoreTable).values({
       storeId: input.storeId,
       productId: input.productId,
       quantity: input.quantity,
     }).returning();
+
+    if (!createdProductToStore) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to assign product to store",
+      });
+    }
+
+    return createdProductToStore;
   }),
 
   unassignProductToStore: adminProcedure.input(unassignProductToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.delete(productToStoreTable).where(and(
+    const [deletedProductToStore] = await ctx.db.delete(productToStoreTable).where(and(
       eq(productToStoreTable.storeId, input.storeId),
       eq(productToStoreTable.productId, input.productId),
     )).returning();
+
+    if (!deletedProductToStore) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to unassign product to store",
+      });
+    }
+
+    return deletedProductToStore;
   }),
 
   changeProductToStoreQuantity: adminProcedure.input(changeProductToStoreQuantitySchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.update(productToStoreTable).set({
+    const productToStore = await ctx.db.query.productToStoreTable.findFirst({
+      where: and(
+        eq(productToStoreTable.storeId, input.storeId),
+        eq(productToStoreTable.productId, input.productId),
+      ),
+    });
+
+    if (!productToStore) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Product not assigned to store",
+      });
+    }
+
+    const [updatedProductToStore] = await ctx.db.update(productToStoreTable).set({
       quantity: input.quantity,
     }).where(and(
       eq(productToStoreTable.storeId, input.storeId),
       eq(productToStoreTable.productId, input.productId),
     )).returning();
+
+    if (!updatedProductToStore) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to change product quantity",
+      });
+    }
+
+    return updatedProductToStore;
   }),
 
   assignPosToStore: adminProcedure.input(assignPosToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.update(posTable).set({
-      storeId: input.storeId,
-    }).where(eq(posTable.id, input.posId)).returning();
+    const [createdPos] = await ctx.db.insert(posTable).values({
+        name: input.name,
+        storeId: input.storeId,
+      }).returning();
+
+      if (!createdPos) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create pos",
+        });
+      }
+
+      return createdPos;
   }),
 
   unassignPosToStore: adminProcedure.input(unassignPosToStoreSchema).mutation(async ({ ctx, input }) => {
-    return await ctx.db.update(posTable).set({
-      deletedAt: sql`CURRENT_TIMESTAMP`,
-    }).where(eq(posTable.id, input.posId)).returning();
+    // const [unassignedPost]= await ctx.db.update(posTable).set({
+    //   deletedAt: sql`CURRENT_TIMESTAMP`,
+    // }).where(eq(posTable.id, input.posId)).returning();
+    const [unassignedPost]= await ctx.db.delete(posTable).where(eq(posTable.id, input.posId)).returning();
+
+    if (!unassignedPost) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to unassign pos to store",
+      });
+    }
+
+    return unassignedPost;
   }),
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,29 +13,38 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/app/components/ui/alert-dialog";
-import { api } from "@/trpc/react";
 import { toast } from "sonner";
 
-interface DeleteStoreModalProps {
-  id: string;
+interface UnassignPosToStoreModalProps {
+  storeId: string;
+  posId: string;
   children: React.ReactNode;
 }
 
-export function DeleteStoreModal({ id, children }: DeleteStoreModalProps) {
+export function UnassignPosToStoreModal({
+  storeId,
+  posId,
+  children,
+}: UnassignPosToStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
-  const { mutate } = api.store.deleteStore.useMutation({
+  const { mutate } = api.store.unassignPosToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
+      await utils.pos.getAllPos.invalidate();
+      await utils.pos.getPos.invalidate({
+        id: data?.id,
+      });
+
       await utils.store.getStoreList.invalidate();
       await utils.store.getStore.invalidate({
-        id: data.id,
+        id: storeId,
       });
-      toast.success("Store deleted");
+      toast.success("PoS unassigned");
     },
     onError: (error) => {
-      toast.error("Store delte failed.", {
+      toast.error("PoS unassign failed.", {
         description: error?.message,
       });
     },
@@ -49,17 +59,17 @@ export function DeleteStoreModal({ id, children }: DeleteStoreModalProps) {
           <AlertDialogDescription>
             This action cannot be undone.
             <br />
-            This will permanently delete the store.
+            This will permanently unassign the PoS from the store.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              mutate({ id });
+              mutate({ storeId, posId });
             }}
           >
-            Delete
+            Unnasign
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

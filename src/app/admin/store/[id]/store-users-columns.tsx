@@ -6,29 +6,53 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
 import { formatDateTime } from "@/lib/date";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import { type RouterOutputs } from "@/trpc/shared";
 import { type ColumnDef } from "@tanstack/react-table";
-import { EyeIcon, MoreHorizontalIcon } from "lucide-react";
+import { EyeIcon, MoreHorizontalIcon, UserMinus } from "lucide-react";
 import Link from "next/link";
+import { UnassignUserToStoreModal } from "./unassign-user-to-store-modal";
 
-type UserStoresTableItem = NonNullable<
-  RouterOutputs["user"]["getUser"]
->["stores"][0]["store"];
+type StoreUsersTableItem = NonNullable<
+  RouterOutputs["store"]["getStore"]
+>["users"][number];
 
-export const USER_STORES_COLUMNS: ColumnDef<UserStoresTableItem>[] = [
+export const STORE_USERS_COLUMNS: ColumnDef<StoreUsersTableItem>[] = [
   {
     header: "Name",
     accessorKey: "name",
     cell: ({ row }) => {
-      return <span className="font-medium">{row?.original?.name ?? "-"}</span>;
+      return (
+        <span className="font-medium">{row?.original?.user?.name ?? "-"}</span>
+      );
     },
   },
   {
-    header: "Created at",
+    header: "Username",
+    accessorKey: "username",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">
+          {row?.original?.user?.username ?? "-"}
+        </span>
+      );
+    },
+  },
+  {
+    header: "Role",
+    accessorKey: "role",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">{row?.original?.user?.role ?? "-"}</span>
+      );
+    },
+  },
+  {
+    header: "Assigned at",
     accessorKey: "createdAt",
     cell: ({ row }) => {
       return (
@@ -39,7 +63,7 @@ export const USER_STORES_COLUMNS: ColumnDef<UserStoresTableItem>[] = [
     },
   },
   {
-    header: "Updated at",
+    header: "Modified at",
     accessorKey: "updatedAt",
     cell: ({ row }) => {
       return (
@@ -64,16 +88,32 @@ export const USER_STORES_COLUMNS: ColumnDef<UserStoresTableItem>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <Link href={`${FRONTEND_ROUTES.ADMIN_STORE}/${row.original?.id}`}>
+              <Link
+                href={`${FRONTEND_ROUTES.ADMIN_USER}/${row.original?.userId}`}
+              >
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
                   }}
                 >
                   <EyeIcon className="mr-2" size={16} />
-                  View Store
+                  View User
                 </DropdownMenuItem>
               </Link>
+              <DropdownMenuSeparator />
+              <UnassignUserToStoreModal
+                storeId={row?.original?.storeId}
+                userId={row?.original?.userId}
+              >
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <UserMinus className="mr-2" size={16} />
+                  Unnasign User
+                </DropdownMenuItem>
+              </UnassignUserToStoreModal>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

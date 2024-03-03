@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -7,17 +9,17 @@ import {
 } from "@/app/components/ui/card";
 import { DataTable } from "@/app/components/ui/data-table";
 import { formatDateTime } from "@/lib/date";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react";
 import { USER_STORES_COLUMNS } from "./user-stores-columns";
 
-export default async function Page({
+export default function Page({
   params,
 }: {
   params: {
     id: string;
   };
 }) {
-  const data = await api.user.getUser.query({
+  const { data } = api.user.getUser.useQuery({
     id: params.id,
   });
 
