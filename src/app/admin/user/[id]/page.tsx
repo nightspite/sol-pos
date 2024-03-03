@@ -11,6 +11,9 @@ import { DataTable } from "@/app/components/ui/data-table";
 import { formatDateTime } from "@/lib/date";
 import { api } from "@/trpc/react";
 import { USER_STORES_COLUMNS } from "./user-stores-columns";
+import { UpdateUserModal } from "../update-user-modal";
+import { Button } from "@/app/components/ui/button";
+import { PencilIcon } from "lucide-react";
 
 export default function Page({
   params,
@@ -27,7 +30,14 @@ export default function Page({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>{data?.name}</CardTitle>
+          <CardTitle>
+            {data?.name}
+            <UpdateUserModal id={data?.id}>
+              <Button size="icon" variant="ghost">
+                <PencilIcon size={16} />
+              </Button>
+            </UpdateUserModal>
+          </CardTitle>
           <CardDescription>{data?.id}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">

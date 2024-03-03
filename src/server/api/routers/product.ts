@@ -92,6 +92,9 @@ export const productRouter = createTRPCRouter({
       const items = await trx.query.productTable.findMany({
         limit: input.limit,
         offset: input.offset,
+        with: {
+          stores: true,
+        }
       });
       const [total] = await trx
         .select({ total: sql<string>`count(*)` })

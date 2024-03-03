@@ -30,7 +30,7 @@ export const unassignPosToStoreSchema = z.object({
 export const assignProductToStoreSchema = z.object({
   storeId: z.string(),
   productId: z.string(),
-  quantity: z.number().default(1),
+  quantity: z.coerce.number().min(1).default(1),
 });
 
 export const unassignProductToStoreSchema = assignProductToStoreSchema.pick({

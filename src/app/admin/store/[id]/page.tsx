@@ -14,9 +14,17 @@ import { api } from "@/trpc/react";
 import { STORE_USERS_COLUMNS } from "./store-users-columns";
 import { AssignUserToStoreModal } from "./assign-user-to-store-modal";
 import { Button } from "@/app/components/ui/button";
-import { BookPlusIcon, UserPlusIcon } from "lucide-react";
+import {
+  BookPlusIcon,
+  PackagePlusIcon,
+  PencilIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import { STORE_POS_COLUMNS } from "./store-pos-columns";
 import { AssignPosToStoreModal } from "./assign-pos-to-store-modal";
+import { AssignProductToStoreModal } from "./assign-product-to-store-modal";
+import { STORE_PRODUCTS_COLUMNS } from "./store-products-columns";
+import { UpdateStoreModal } from "../update-store-modal";
 
 export default function Page({
   params,
@@ -33,7 +41,15 @@ export default function Page({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>{data?.name}</CardTitle>
+          <CardTitle>
+            {data?.name}
+
+            <UpdateStoreModal id={data?.id}>
+              <Button size="icon" variant="ghost">
+                <PencilIcon size={16} />
+              </Button>
+            </UpdateStoreModal>
+          </CardTitle>
           <CardDescription>{data?.id}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
@@ -107,7 +123,7 @@ export default function Page({
           />
         </CardContent>
       </Card>
-      {/* <Card>
+      <Card>
         <CardHeader>
           <CardTitle>
             Products
@@ -136,7 +152,7 @@ export default function Page({
             // }}
           />
         </CardContent>
-      </Card> */}
+      </Card>
     </div>
   );
 }

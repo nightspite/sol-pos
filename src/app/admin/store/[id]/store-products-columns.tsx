@@ -6,24 +6,54 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
 import { formatDateTime } from "@/lib/date";
+import { FRONTEND_ROUTES } from "@/lib/routes";
 import { type RouterOutputs } from "@/trpc/shared";
 import { type ColumnDef } from "@tanstack/react-table";
-import { BookMinusIcon, MoreHorizontalIcon } from "lucide-react";
-import { UnassignPosToStoreModal } from "./unassign-pos-to-store-modal";
+import { EyeIcon, MoreHorizontalIcon, PackageMinusIcon } from "lucide-react";
+import Link from "next/link";
+import { UnassignProductToStoreModal } from "./unassign-product-to-store-modal";
+import { formatMoney } from "@/lib/money";
 
-type StorePosTableItem = NonNullable<
+type StoreProductsTableItem = NonNullable<
   RouterOutputs["store"]["getStore"]
->["pos"][number];
+>["products"][number];
 
-export const STORE_POS_COLUMNS: ColumnDef<StorePosTableItem>[] = [
+export const STORE_PRODUCTS_COLUMNS: ColumnDef<StoreProductsTableItem>[] = [
   {
     header: "Name",
     accessorKey: "name",
     cell: ({ row }) => {
-      return <span className="font-medium">{row?.original?.name ?? "-"}</span>;
+      return (
+        <span className="font-medium">
+          {row?.original?.product?.name ?? "-"}
+        </span>
+      );
+    },
+  },
+  {
+    header: "Price",
+    accessorKey: "price",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">
+          {row?.original?.product?.price
+            ? formatMoney(row?.original?.product?.price)
+            : "-"}
+        </span>
+      );
+    },
+  },
+  {
+    header: "Quantity",
+    accessorKey: "quantity",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">{row?.original?.quantity ?? "-"}</span>
+      );
     },
   },
   {
@@ -63,30 +93,32 @@ export const STORE_POS_COLUMNS: ColumnDef<StorePosTableItem>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* <Link href={`${FRONTEND_ROUTES.ADMIN_POS}/${row.original?.id}`}>
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <EyeIcon className="mr-2" size={16} />
-                  View PoS
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator /> */}
-              <UnassignPosToStoreModal
-                storeId={row?.original?.storeId}
-                posId={row?.original?.id}
+              <Link
+                href={`${FRONTEND_ROUTES.ADMIN_PRODUCT}/${row.original?.productId}`}
               >
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
                   }}
                 >
-                  <BookMinusIcon className="mr-2" size={16} />
-                  Unnasign PoS
+                  <EyeIcon className="mr-2" size={16} />
+                  View Product
                 </DropdownMenuItem>
-              </UnassignPosToStoreModal>
+              </Link>
+              <DropdownMenuSeparator />
+              <UnassignProductToStoreModal
+                storeId={row?.original?.storeId}
+                productId={row?.original?.productId}
+              >
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <PackageMinusIcon className="mr-2" size={16} />
+                  Unnasign Product
+                </DropdownMenuItem>
+              </UnassignProductToStoreModal>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

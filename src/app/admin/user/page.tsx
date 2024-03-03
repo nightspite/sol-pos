@@ -89,6 +89,15 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
+    header: "Number of stores",
+    accessorKey: "stores",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">{row.original?.stores?.length ?? 0}</span>
+      );
+    },
+  },
+  {
     header: "Created at",
     accessorKey: "createdAt",
     cell: ({ row }) => {
@@ -107,15 +116,6 @@ const COLUMS: ColumnDef<TableItem>[] = [
         <span className="font-medium">
           {formatDateTime(row.original?.updatedAt)}
         </span>
-      );
-    },
-  },
-  {
-    header: "Number of stores",
-    accessorKey: "stores",
-    cell: ({ row }) => {
-      return (
-        <span className="font-medium">{row.original?.stores?.length ?? 0}</span>
       );
     },
   },

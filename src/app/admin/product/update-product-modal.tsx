@@ -72,12 +72,12 @@ export function UpdateProductModal({ id, children }: UpdateProductModalProps) {
     defaultValues: {
       id: data?.id ?? "",
       name: data?.name ?? "",
-      price: data?.price ?? 0,
+      price: data?.price ? data?.price / 100 : 0,
     },
     values: {
       id: data?.id ?? "",
       name: data?.name ?? "",
-      price: data?.price ?? 0,
+      price: data?.price ? data?.price / 100 : 0,
     },
   });
 

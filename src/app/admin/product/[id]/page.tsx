@@ -13,6 +13,9 @@ import { api } from "@/trpc/react";
 import { PRODUCT_STORES_COLUMNS } from "./product-stores-columns";
 import { formatMoney } from "@/lib/money";
 import { PRODUCT_ORDERS_COLUMNS } from "./product-orders-columns";
+import { UpdateProductModal } from "../update-product-modal";
+import { Button } from "@/app/components/ui/button";
+import { PencilIcon } from "lucide-react";
 
 export default function Page({
   params,
@@ -29,7 +32,15 @@ export default function Page({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>{data?.name}</CardTitle>
+          <CardTitle>
+            {data?.name}
+
+            <UpdateProductModal id={data?.id}>
+              <Button size="icon" variant="ghost">
+                <PencilIcon size={16} />
+              </Button>
+            </UpdateProductModal>
+          </CardTitle>
           <CardDescription>{data?.id}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">

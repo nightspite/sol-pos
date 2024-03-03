@@ -31,63 +31,64 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
-import { assignUserToStoreSchema } from "@/schemas/store";
+import { assignProductToStoreSchema } from "@/schemas/store";
 import { toast } from "sonner";
+import { Input } from "@/app/components/ui/input";
 
-interface AssignUserToStoreModalProps {
+interface AssignProductToStoreModalProps {
   storeId: string;
   children: React.ReactNode;
 }
 
-type FormType = z.infer<typeof assignUserToStoreSchema>;
+type FormType = z.infer<typeof assignProductToStoreSchema>;
 
-export function AssignUserToStoreModal({
+export function AssignProductToStoreModal({
   storeId,
   children,
-}: AssignUserToStoreModalProps) {
+}: AssignProductToStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
   const { data: store } = api.store.getStore.useQuery({
     id: storeId,
   });
-  const { data: users } = api.user.getAllUsers.useQuery();
+  const { data: products } = api.product.getAllProducts.useQuery();
 
-  const { mutate } = api.store.assignUserToStore.useMutation({
+  const { mutate } = api.store.assignProductToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
-      await utils.user.getAllUsers.invalidate();
-      await utils.user.getUserList.invalidate();
-      await utils.user.getUser.invalidate({
-        id: data?.userId,
+      await utils.product.getAllProducts.invalidate();
+      await utils.product.getProductList.invalidate();
+      await utils.product.getProduct.invalidate({
+        id: data?.productId,
       });
 
       await utils.store.getStoreList.invalidate();
       await utils.store.getStore.invalidate({
         id: storeId,
       });
-      toast.success("User assigned to store");
+      toast.success("Product assigned to store");
     },
     onError: (error) => {
-      toast.error("User assign failed.", {
+      toast.error("Product assign failed.", {
         description: error?.message,
       });
     },
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(assignUserToStoreSchema),
+    resolver: zodResolver(assignProductToStoreSchema),
     defaultValues: {
       storeId,
-      userId: "",
+      productId: "",
     },
   });
 
-  const unnasignedUsers = useMemo(() => {
-    return users?.filter(
-      (u) => !store?.users?.some((su) => su?.userId === u?.id),
+  const unnasignedProducts = useMemo(() => {
+    return products?.filter(
+      (u) => !store?.products?.some((su) => su?.productId === u?.id),
     );
-  }, [store?.users, users]);
+  }, [store?.products, products]);
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
@@ -95,7 +96,7 @@ export function AssignUserToStoreModal({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign user to {store?.name}</DialogTitle>
+          <DialogTitle>Assign product to {store?.name}</DialogTitle>
           <DialogDescription>Store id {store?.id}</DialogDescription>
         </DialogHeader>
 
@@ -108,10 +109,10 @@ export function AssignUserToStoreModal({
           >
             <FormField
               control={form.control}
-              name="userId"
+              name="productId"
               render={({ field }) => (
                 <FormItem className="">
-                  <FormLabel>User</FormLabel>
+                  <FormLabel>Product</FormLabel>
                   <FormControl>
                     <Select
                       onValueChange={(v) => {
@@ -120,24 +121,38 @@ export function AssignUserToStoreModal({
                       value={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Pick user" />
+                        <SelectValue placeholder="Pick product" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(unnasignedUsers ?? [])?.length > 0 ? (
+                        {(unnasignedProducts ?? [])?.length > 0 ? (
                           <>
-                            {unnasignedUsers?.map((user) => (
-                              <SelectItem key={user?.id} value={user?.id}>
-                                {user?.name} ({user?.username})
+                            {unnasignedProducts?.map((product) => (
+                              <SelectItem key={product?.id} value={product?.id}>
+                                {product?.name} ({product?.id})
                               </SelectItem>
                             ))}
                           </>
                         ) : (
                           <SelectItem disabled value="disabled">
-                            No users to assign
+                            No products to assign
                           </SelectItem>
                         )}
                       </SelectContent>
                     </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem className="">
+                  <FormLabel>Quantity</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} placeholder={"1"} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

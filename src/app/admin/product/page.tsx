@@ -92,6 +92,17 @@ const COLUMS: ColumnDef<TableItem>[] = [
     },
   },
   {
+    header: "Number of stores",
+    accessorKey: "stores",
+    cell: ({ row }) => {
+      return (
+        <span className="font-medium">
+          {row?.original?.stores?.length ?? "-"}
+        </span>
+      );
+    },
+  },
+  {
     header: "Created at",
     accessorKey: "createdAt",
     cell: ({ row }) => {
