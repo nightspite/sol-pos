@@ -26,7 +26,7 @@ export default function Page({
     id: params.id,
   });
 
-  const sum = data?.items?.reduce(
+  const sum = (data?.items ?? [])?.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
@@ -36,7 +36,7 @@ export default function Page({
       <Card>
         <CardHeader>
           <CardTitle>{data?.id}</CardTitle>
-          <CardDescription>{sum ? formatMoney(sum) : "-"}</CardDescription>
+          <CardDescription>{formatMoney(sum)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div>

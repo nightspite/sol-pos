@@ -24,10 +24,15 @@ const main = async () => {
     name: "POS #1",
     storeId: createdStore?.id ?? "",
   }).returning();
-  const [createdUserToStore] = await db.insert(userToStoreTable).values({
+  const [createdUserToStore1] = await db.insert(userToStoreTable).values({
     userId: createdCashier?.id ?? "",
     storeId: createdStore?.id ?? "",
   }).returning();
+  const [createdUser1ToStore2] = await db.insert(userToStoreTable).values({
+    userId: createdAdmin?.id ?? "",
+    storeId: createdStore?.id ?? "",
+  }).returning();
+
 
   const [createdProduct1] = await db.insert(productTable).values({
     name: "Product #1",

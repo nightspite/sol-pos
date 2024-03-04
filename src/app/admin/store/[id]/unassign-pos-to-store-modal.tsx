@@ -32,7 +32,7 @@ export function UnassignPosToStoreModal({
   const { mutate } = api.store.unassignPosToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
-      await utils.pos.getAllPos.invalidate();
+      // await utils.pos.getAllPos.invalidate();
       await utils.pos.getPos.invalidate({
         id: data?.id,
       });

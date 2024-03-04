@@ -49,7 +49,7 @@ export function AssignPosToStoreModal({
   const { mutate } = api.store.assignPosToStore.useMutation({
     onSuccess: async (data) => {
       setIsOpen(false);
-      await utils.pos.getAllPos.invalidate();
+      // await utils.pos.getAllPos.invalidate();
       await utils.pos.getPos.invalidate({
         id: data?.id,
       });

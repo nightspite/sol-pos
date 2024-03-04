@@ -86,16 +86,12 @@ const COLUMS: ColumnDef<TableItem>[] = [
     header: "Sum",
     accessorKey: "sum",
     cell: ({ row }) => {
-      const sum = row?.original?.items?.reduce(
+      const sum = (row?.original?.items ?? [])?.reduce(
         (acc, item) => acc + item.price * item.quantity,
         0,
       );
 
-      return (
-        <span className="font-medium">
-          {(row?.original?.items || [])?.length > 0 ? formatMoney(sum) : "-"}
-        </span>
-      );
+      return <span className="font-medium">{formatMoney(sum)}</span>;
     },
   },
   {
