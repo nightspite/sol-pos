@@ -33,6 +33,14 @@ export const posRouter = createTRPCRouter({
   })).query(async ({ ctx, input }) => {
     return await ctx.db.query.posTable.findFirst({
       where: (u) => eq(u.id, input.id),
+      with: {
+        store: {
+          with: {
+            products: true,
+            users: true,
+          }
+        }
+      }
     });
   }),
 });
