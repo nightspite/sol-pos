@@ -15,4 +15,5 @@ export const FRONTEND_ROUTES = {
   ADMIN_TRANSACTION: "/admin/transaction",
 
   POS: "/pos",
+  ORDER: "/order",
 } as const;

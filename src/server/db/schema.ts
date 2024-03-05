@@ -118,7 +118,7 @@ export const posRelations = relations(posTable, ({ one, many }) => ({
   orders: many(orderTable)
 }));
 
-export const ORDER_STATUS_ARRAY = ["CART", "PAID", "CANCELLED"] as const;
+export const ORDER_STATUS_ARRAY = ["CART", "COMPLETED", "ERROR"] as const;
 export const orderStatusEnum = pgEnum('orderStatusEnum', ORDER_STATUS_ARRAY);
 
 export const orderTable = createTable(
@@ -128,6 +128,10 @@ export const orderTable = createTable(
     storeId: varchar("storeId", { length: 255 }).notNull().references(() => storeTable.id),
     posId: varchar("posId", { length: 255 }).notNull().references(() => posTable.id),
     status: orderStatusEnum('status').default('CART').notNull(),
+
+    // blockchain
+    paymentUrl: text("paymentUrl"),
+    signature: text("signature"),
 
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -148,10 +152,6 @@ export const orderRelations = relations(orderTable, ({ one, many }) => ({
     references: [posTable.id],
   }),
   items: many(orderItemTable),
-  transaction: one(transactionTable, {
-    fields: [orderTable.id],
-    references: [transactionTable.orderId],
-  })
 }));
 
 export const orderItemTable = createTable(
@@ -179,42 +179,6 @@ export const orderItemRelations = relations(orderItemTable, ({ one }) => ({
   }),
   order: one(orderTable, {
     fields: [orderItemTable.orderId],
-    references: [orderTable.id],
-  }),
-}));
-
-
-// export const TRANSACTION_STATUS_ARRAY = ["SUCCESS", "FAILURE", "FINALIZED"] as const;
-// export const transactionStatusEnum = pgEnum('transactionStatusEnum', TRANSACTION_STATUS_ARRAY);
-
-export const transactionTable = createTable(
-  "transaction",
-  {
-    id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
-    orderId: varchar("orderId", { length: 255 }).notNull().references(() => orderTable.id),
-
-    signature: text("signature"),
-    // block: text("block"),
-    // timestamp: timestamp("timestamp"),
-    // status: transactionStatusEnum('status'),
-    // signer: text("signer"),
-    // fee: integer("fee"),
-    // mainActions: jsonb('mainActions').$type<{}[]>(),
-    // // txMap: text("txMap"),
-    // yourNotes: text("yourNotes"),
-
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-);
-
-export const transactionRelations = relations(transactionTable, ({ one }) => ({
-  order: one(orderTable, {
-    fields: [transactionTable.orderId],
     references: [orderTable.id],
   }),
 }));

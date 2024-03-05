@@ -14,6 +14,7 @@ import { formatMoney } from "@/lib/money";
 import { ORDER_PRODUCTS_COLUMNS } from "./order-products-columns";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import Link from "next/link";
+import { getSolscanUrl } from "@/lib/solana";
 
 export default function Page({
   params,
@@ -41,6 +42,19 @@ export default function Page({
         <CardContent className="space-y-2 text-sm">
           <div>
             <b>Status:</b> {data?.status ?? "-"}
+          </div>
+          <div className="line-clamp-1">
+            <b>Solscan:</b>{" "}
+            {data?.signature ? (
+              <a
+                href={getSolscanUrl(data?.signature)}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {getSolscanUrl(data?.signature)}
+              </a>
+            ) : null}
           </div>
           <div>
             <b>Pos:</b> {data?.pos?.name} ({data?.posId ?? "-"})

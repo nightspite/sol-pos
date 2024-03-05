@@ -106,6 +106,7 @@ const ActionsCell = ({
   return (
     <Form {...form}>
       <form
+        className="flex justify-end"
         onSubmit={form.handleSubmit((data) => {
           mutate(data);
         })}

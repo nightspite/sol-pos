@@ -9,6 +9,9 @@ import { useMemo } from "react";
 import { AddProductToCartModal } from "./add-product-to-cart-modal";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
+import { FRONTEND_ROUTES } from "@/lib/routes";
+import { useRouter } from "next/navigation";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page({
   params,
@@ -18,18 +21,20 @@ export default function Page({
   };
 }) {
   const session = useSession();
-  const { data: pos } = api.pos.getPos.useQuery({
+  const router = useRouter();
+  const { data: pos, isLoading: isLoadingPos } = api.pos.getPos.useQuery({
     id: params.id,
   });
 
-  const { data: order } = api.order.getCartOrder.useQuery(
-    {
-      posId: params.id,
-    },
-    {
-      enabled: !!pos,
-    },
-  );
+  const { data: order, isLoading: isLoadingOrder } =
+    api.order.getCartOrder.useQuery(
+      {
+        posId: params.id,
+      },
+      {
+        enabled: !!pos,
+      },
+    );
 
   const utils = api.useUtils();
   const { mutate: addToCart } = api.order.addProductToCart.useMutation({
@@ -47,6 +52,7 @@ export default function Page({
       });
     },
   });
+
   const { mutate: removeFromCart } =
     api.order.removeProductFromCart.useMutation({
       onSuccess: async (data) => {
@@ -64,12 +70,43 @@ export default function Page({
       },
     });
 
+  const { mutateAsync: generatePaymentLink } =
+    api.order.generatePaymentLink.useMutation({
+      onSuccess: async (data) => {
+        if (data) {
+          router.push(`${FRONTEND_ROUTES.ORDER}/${data.id}`);
+          await utils.pos.getPos.invalidate({
+            id: data?.posId,
+          });
+          await utils.order.getCartOrder.invalidate({
+            posId: data?.posId,
+          });
+          await utils.order.getOrder.invalidate({
+            id: data?.id,
+          });
+        }
+      },
+      onError: (error) => {
+        toast.error("Failed to generate payment link", {
+          description: error.message,
+        });
+      },
+    });
+
   const sum = useMemo(() => {
     return (order?.items ?? []).reduce(
       (acc, item) => acc + item.product.price * item.quantity,
       0,
     );
   }, [order?.items]);
+
+  if (isLoadingPos || isLoadingOrder) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   if (
     !pos?.store?.users?.find((user) => user.userId === session?.data?.user?.id)
@@ -82,8 +119,8 @@ export default function Page({
   }
 
   return (
-    <div className="relative mx-auto min-h-screen w-full max-w-3xl border border-border py-16">
-      <div className="absolute top-0 flex h-16 w-full items-center justify-between border border-b border-border px-4 font-semibold">
+    <div className="relative mx-auto min-h-screen w-full max-w-3xl py-16">
+      <div className="absolute top-0 flex h-16 w-full items-center justify-between rounded-md border border-b border-border px-4 font-semibold">
         Point of Sale {pos.name}
         {order?.id ? (
           <AddProductToCartModal orderId={order?.id}>
@@ -99,7 +136,7 @@ export default function Page({
           minHeight: "calc(100dvh - 130px)",
         }}
       >
-        <div className="space-y-4 p-4">
+        <div className="mt-4 space-y-4">
           {order?.items
             ?.sort((a, b) => {
               return (
@@ -110,7 +147,7 @@ export default function Page({
             ?.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between border border-border p-4"
+                className="flex items-center justify-between rounded-md border border-border p-4"
               >
                 <div>
                   <div>{item.product.name}</div>
@@ -149,7 +186,7 @@ export default function Page({
                     {formatMoney(item?.price * item?.quantity)})
                   </div>
                   <Button
-                    variant="destructive"
+                    // variant="destructive"
                     size="icon"
                     onClick={() => {
                       removeFromCart({
@@ -166,9 +203,18 @@ export default function Page({
             ))}
         </div>
       </div>
-      <div className="absolute bottom-0 flex h-16 w-full items-center justify-between border border-b border-border px-4">
+      <div className="absolute bottom-0 flex h-16 w-full items-center justify-between rounded-md border border-b border-border px-4">
         <div className="text-xl font-semibold">{formatMoney(sum)}</div>
-        <Button>Pay</Button>
+        {order?.id ? (
+          <Button
+            onClick={() => generatePaymentLink({ orderId: order?.id })}
+            disabled={!sum}
+          >
+            Pay
+          </Button>
+        ) : (
+          <Button disabled>Pay</Button>
+        )}
       </div>
     </div>
   );

@@ -4,79 +4,17 @@ import {
   cashierProcedure,
   createTRPCRouter,
 } from "@/server/api/trpc";
-import { orderItemTable, orderTable, productToStoreTable, storeTable } from "@/server/db/schema";
+import { orderItemTable, orderTable, productToStoreTable } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { type SQL, eq, sql, and } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { z } from "zod";
+import { type TransferRequestURLFields, encodeURL, validateTransfer } from '@solana/pay';
+import { PublicKey } from '@solana/web3.js';
+import { USDC_SPL_TOKEN, connection, uuidToBase58 } from "@/lib/solana";
+import { POS_WALLET_ADDRESS } from "@/lib/solana";
+import { BigNumber } from "bignumber.js";
 
 export const orderRouter = createTRPCRouter({
-  createOrder: cashierProcedure.input(z.object({
-    storeId: z.string(),
-    posId: z.string(),
-  })).mutation(async ({ ctx, input }) => {
-    const [createdOrder] = await ctx.db.insert(orderTable).values({
-      posId: input.posId,
-      storeId: input.storeId,
-      status: "CART",
-    }).returning();
-
-    if (!createdOrder) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Order not found",
-      });
-    }
-
-    return createdOrder;
-  }),
-
-  // addProductToOrder: cashierProcedure.input(z.object({
-  //   orderId: z.string(),
-  //   productId: z.string(),
-  //   quantity: z.number(),
-  // })).mutation(async ({ ctx, input }) => {
-  //   const [order] = await ctx.db.query.orderTable.findFirst({
-  //     where: (u) => eq(u.id, input.orderId),
-  //   });
-
-  //   if (!order) {
-  //     throw new TRPCError({
-  //       code: "NOT_FOUND",
-  //       message: "Order not found",
-  //     });
-  //   }
-
-  //   const [product] = await ctx.db.query.productToStoreTable.findFirst({
-  //     where: (u) => eq(u.productId, input.productId),
-  //   });
-
-  //   if (!product) {
-  //     throw new TRPCError({
-  //       code: "NOT_FOUND",
-  //       message: "Product not found",
-  //     });
-  //   }
-
-  //   const [orderItem] = await ctx.db.insert(orderTable.items).values({
-  //     orderId: input.orderId,
-  //     productId: input.productId,
-  //     quantity: input.quantity,
-  //   }).returning();
-
-  //   if (!orderItem) {
-  //     throw new TRPCError({
-  //       code: "NOT_FOUND",
-  //       message: "Order item not found",
-  //     });
-  //   }
-
-  //   return orderItem;
-  // }),
-
-  getAllOrder: adminProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.orderTable.findMany();
-  }),
-
   getOrderList: adminProcedure.input(z.object({
     limit: z.number().default(10),
     offset: z.number().default(0),
@@ -428,5 +366,118 @@ export const orderRouter = createTRPCRouter({
     return updatedOrder;
   }),
 
-  // checkout -> generate solana transaction
+  generatePaymentLink: cashierProcedure.input(z.object({
+    orderId: z.string(),
+  })).mutation(async ({ ctx, input }) => {
+    const order = await ctx.db.query.orderTable.findFirst({
+      where: (u) => and(eq(u.id, input.orderId)),
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Order not found",
+      });
+    }
+
+    if (order.status !== "CART") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Order status is not CART",
+      });
+    }
+
+    const sum = order?.items?.reduce(
+      (acc, item) => acc + item.product.price * item.quantity,
+      0,
+    );
+
+    if (sum <= 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Order total is 0",
+      });
+    }
+
+    const fields: TransferRequestURLFields = {
+      recipient: new PublicKey(POS_WALLET_ADDRESS),
+      amount: new BigNumber(sum / 100),
+      splToken: new PublicKey(USDC_SPL_TOKEN),
+      reference: new PublicKey(uuidToBase58(order?.id)),
+      label: 'Solana PoS Store',
+      message: `Solana PoS Store - Order ${order.id} - ${sum} USDC`,
+      memo: order?.id,
+    }
+
+    const url = encodeURL({...fields});
+
+    const [updatedOrder] = await ctx.db.update(orderTable).set({
+      paymentUrl: url.toString(),
+    }).where(eq(orderTable.id, order.id)).returning();
+
+    return updatedOrder
+  }),
+
+  verifyTransaction: cashierProcedure.input(z.object({
+    orderId: z.string(),
+    signature: z.string(),
+  })).mutation(async ({ ctx, input }) => {
+    const order = await ctx.db.query.orderTable.findFirst({
+      where: (u) => and(eq(u.id, input.orderId)),
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Order not found",
+      });
+    }
+
+    if (order.status !== "CART") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Order status is not CART",
+      });
+    }
+
+    const sum = order?.items?.reduce(
+      (acc, item) => acc + item.product.price * item.quantity,
+      0,
+    );
+
+    const validation = await validateTransfer(connection, input.signature, {
+      recipient: new PublicKey(POS_WALLET_ADDRESS),
+      amount: new BigNumber(sum / 100),
+      splToken: new PublicKey(USDC_SPL_TOKEN),
+      reference: new PublicKey(uuidToBase58(order?.id)),
+    }, { commitment: 'confirmed' });
+
+    if (!validation) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Transaction is not valid",
+      });
+    }
+
+    const [updatedOrder] = await ctx.db.update(orderTable).set({
+      status: "COMPLETED",
+      signature: input.signature,
+    }).where(eq(orderTable.id, order.id)).returning();
+
+    return updatedOrder
+  }),
 });

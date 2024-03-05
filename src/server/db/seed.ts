@@ -36,23 +36,23 @@ const main = async () => {
 
   const [createdProduct1] = await db.insert(productTable).values({
     name: "Product #1",
-    price: 1000,
+    price: 1,
   }).returning();
   const [createdProduct2] = await db.insert(productTable).values({
     name: "Product #2",
-    price: 2000,
+    price: 2,
   }).returning();
   const [createdProduct3] = await db.insert(productTable).values({
     name: "Product #3",
-    price: 3000,
+    price: 3,
   }).returning();
   const [createdProduct4] = await db.insert(productTable).values({
     name: "Product #4",
-    price: 4000,
+    price: 4,
   }).returning();
   const [createdProduct5] = await db.insert(productTable).values({
     name: "Product #5",
-    price: 5000,
+    price: 5,
   }).returning();
 
   await db.insert(productToStoreTable).values({

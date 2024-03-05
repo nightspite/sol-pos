@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import { formatMoney } from "@/lib/money";
+import { getSolscanUrl } from "@/lib/solana";
 
 export default function Page() {
   const [pagination, setPagination] = useState({
@@ -92,6 +93,24 @@ const COLUMS: ColumnDef<TableItem>[] = [
       );
 
       return <span className="font-medium">{formatMoney(sum)}</span>;
+    },
+  },
+  {
+    header: "Solscan",
+    accessorKey: "solscan",
+    cell: ({ row }) => {
+      if (row?.original?.signature) {
+        return (
+          <a
+            href={getSolscanUrl(row?.original?.signature)}
+            target="_blank"
+            rel="noreferrer"
+            className="block max-w-[60px] truncate underline"
+          >
+            {getSolscanUrl(row?.original?.signature)}
+          </a>
+        );
+      }
     },
   },
   {

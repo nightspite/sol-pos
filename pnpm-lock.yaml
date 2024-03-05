@@ -53,6 +53,9 @@ dependencies:
   '@solana/pay':
     specifier: ^0.2.5
     version: 0.2.5(fastestsmallesttextencoderdecoder@1.0.22)
+  '@solana/qr-code-styling':
+    specifier: ^1.6.0
+    version: 1.6.0
   '@solana/spl-token':
     specifier: ^0.4.1
     version: 0.4.1(@solana/web3.js@1.90.0)(fastestsmallesttextencoderdecoder@1.0.22)
@@ -95,8 +98,11 @@ dependencies:
   '@types/crypto-js':
     specifier: ^4.2.2
     version: 4.2.2
+  bigint-buffer:
+    specifier: ^1.1.5
+    version: 1.1.5
   bignumber.js:
-    specifier: ^9.1.2
+    specifier: ^9.1.0
     version: 9.1.2
   bs58:
     specifier: ^5.0.0
@@ -125,6 +131,9 @@ dependencies:
   esbuild-register:
     specifier: ^3.5.0
     version: 3.5.0(esbuild@0.19.12)
+  jotai:
+    specifier: ^2.7.0
+    version: 2.7.0(@types/react@18.2.60)(react@18.2.0)
   lucide-react:
     specifier: ^0.344.0
     version: 0.344.0(react@18.2.0)
@@ -172,6 +181,9 @@ dependencies:
     version: 3.22.4
 
 devDependencies:
+  '@types/bs58':
+    specifier: ^4.0.4
+    version: 4.0.4
   '@types/eslint':
     specifier: ^8.56.2
     version: 8.56.4
@@ -5680,6 +5692,13 @@ packages:
     resolution: {integrity: sha512-KOzBEVaHW9IxEedUP9E50y0tYxAuvlzyjn80Bpemw4rcNbT4WtJnhkFPUY+qDJl7Crt3B/oY2qMgSxVWi9toLg==}
     dev: false
 
+  /@types/bs58@4.0.4:
+    resolution: {integrity: sha512-0IEpMFXXQi2zXaXl9GJ3sRwQo0uEkD+yFOv+FnAU5lkPtcu6h61xb7jc2CFPEZ5BUOaiP13ThuGc9HD4R8lR5g==}
+    dependencies:
+      '@types/node': 20.11.21
+      base-x: 3.0.9
+    dev: true
+
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
@@ -6733,7 +6752,6 @@ packages:
     resolution: {integrity: sha512-H7JU6iBHTal1gp56aKoaa//YUxEaAOUiydvrV/pILqIHXTtqxSkATOnDA2u+jZ/61sD+L/412+7kzXRtWukhpQ==}
     dependencies:
       safe-buffer: 5.2.1
-    dev: false
 
   /base-x@4.0.0:
     resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
@@ -9666,6 +9684,22 @@ packages:
     resolution: {integrity: sha512-/WByRr4jDcsKlvMd1dRJnPfS1GVO3WuKyaurJ/vvXcOaUQO8rnNObCQMlv/5uCceVQIq5Q4WLF44ohsdiTohdg==}
     dev: false
 
+  /jotai@2.7.0(@types/react@18.2.60)(react@18.2.0):
+    resolution: {integrity: sha512-4qsyFKu4MprI39rj2uoItyhu24NoCHzkOV7z70PQr65SpzV6CSyhQvVIfbNlNqOIOspNMdf5OK+kTXLvqe63Jw==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 18.2.60
+      react: 18.2.0
+    dev: false
+
   /js-base64@3.7.7:
     resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
     dev: false
@@ -12041,7 +12075,6 @@ packages:
 
   /safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
-    dev: false
 
   /safe-regex-test@1.0.3:
     resolution: {integrity: sha512-CdASjNJPvRa7roO6Ra/gLYBTzYzzPyyBXxIMdGW3USQLyjWEls2RgW5UBTXaQVp+OrpeCK3bLem8smtmheoRuw==}
