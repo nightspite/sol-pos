@@ -14,6 +14,8 @@ import { USER_STORES_COLUMNS } from "./user-stores-columns";
 import { UpdateUserModal } from "../update-user-modal";
 import { Button } from "@/app/components/ui/button";
 import { PencilIcon } from "lucide-react";
+import { FullscreenMessage } from "@/app/components/fullscreen-message";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page({
   params,
@@ -22,9 +24,17 @@ export default function Page({
     id: string;
   };
 }) {
-  const { data } = api.user.getUser.useQuery({
+  const { data, isLoading } = api.user.getUser.useQuery({
     id: params.id,
   });
+
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   return (
     <div className="space-y-4">

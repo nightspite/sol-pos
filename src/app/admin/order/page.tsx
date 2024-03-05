@@ -19,6 +19,8 @@ import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import { formatMoney } from "@/lib/money";
 import { getSolscanUrl } from "@/lib/solana";
+import { FullscreenMessage } from "@/app/components/fullscreen-message";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page() {
   const [pagination, setPagination] = useState({
@@ -30,6 +32,14 @@ export default function Page() {
     limit: pagination.pageSize,
     offset: pagination.pageIndex * pagination.pageSize,
   });
+
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   return (
     <div>

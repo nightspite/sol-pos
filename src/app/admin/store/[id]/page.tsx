@@ -25,6 +25,8 @@ import { AssignPosToStoreModal } from "./assign-pos-to-store-modal";
 import { AssignProductToStoreModal } from "./assign-product-to-store-modal";
 import { STORE_PRODUCTS_COLUMNS } from "./store-products-columns";
 import { UpdateStoreModal } from "../update-store-modal";
+import { FullscreenMessage } from "@/app/components/fullscreen-message";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page({
   params,
@@ -33,10 +35,17 @@ export default function Page({
     id: string;
   };
 }) {
-  const { data } = api.store.getStore.useQuery({
+  const { data, isLoading } = api.store.getStore.useQuery({
     id: params.id,
   });
 
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
   return (
     <div className="space-y-4">
       <Card>

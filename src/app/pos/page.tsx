@@ -12,9 +12,11 @@ import Link from "next/link";
 import { api } from "@/trpc/react";
 import { useMemo, useState } from "react";
 import { FRONTEND_ROUTES } from "@/lib/routes";
+import { FullscreenMessage } from "../components/fullscreen-message";
+import { Spinner } from "../components/ui/spinner";
 
 export default function Page() {
-  const { data } = api.user.getMe.useQuery();
+  const { data, isLoading } = api.user.getMe.useQuery();
 
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
 
@@ -22,6 +24,14 @@ export default function Page() {
     return data?.stores?.find((store) => store.storeId === selectedStore)?.store
       ?.pos;
   }, [data, selectedStore]);
+
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center overflow-hidden">

@@ -27,6 +27,8 @@ import Link from "next/link";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import { CreateUserModal } from "./create-user-modal";
 import { UpdateUserModal } from "./update-user-modal";
+import { FullscreenMessage } from "@/app/components/fullscreen-message";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page() {
   const [pagination, setPagination] = useState({
@@ -38,6 +40,14 @@ export default function Page() {
     limit: pagination.pageSize,
     offset: pagination.pageIndex * pagination.pageSize,
   });
+
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   return (
     <div>

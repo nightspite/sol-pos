@@ -15,6 +15,8 @@ import { ORDER_PRODUCTS_COLUMNS } from "./order-products-columns";
 import { FRONTEND_ROUTES } from "@/lib/routes";
 import Link from "next/link";
 import { getSolscanUrl } from "@/lib/solana";
+import { FullscreenMessage } from "@/app/components/fullscreen-message";
+import { Spinner } from "@/app/components/ui/spinner";
 
 export default function Page({
   params,
@@ -23,7 +25,7 @@ export default function Page({
     id: string;
   };
 }) {
-  const { data } = api.order.getOrder.useQuery({
+  const { data, isLoading } = api.order.getOrder.useQuery({
     id: params.id,
   });
 
@@ -31,6 +33,14 @@ export default function Page({
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
+
+  if (isLoading) {
+    return (
+      <FullscreenMessage custom>
+        <Spinner size="xl" />
+      </FullscreenMessage>
+    );
+  }
 
   return (
     <div className="space-y-4">
