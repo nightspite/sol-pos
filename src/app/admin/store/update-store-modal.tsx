@@ -12,7 +12,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import { createStoreSchema, updateStoreSchema } from "@/schemas/store";
+import { updateStoreSchema } from "@/schemas/store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

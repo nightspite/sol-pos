@@ -3,9 +3,9 @@ import {
   adminProcedure,
   createTRPCRouter,
 } from "@/server/api/trpc";
-import { posTable, productTable, productToStoreTable, storeTable } from "@/server/db/schema";
+import { productTable } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { type SQL, eq, sql, and } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const productRouter = createTRPCRouter({

@@ -92,7 +92,7 @@ export const orderRouter = createTRPCRouter({
     });
 
     if (!order) {
-      const [createdOrder] = await ctx.db.insert(orderTable).values({
+      await ctx.db.insert(orderTable).values({
         posId: input.posId,
         storeId: pos.storeId,
         status: "CART",

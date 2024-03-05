@@ -3,9 +3,9 @@ import {
   cashierProcedure,
   createTRPCRouter,
 } from "@/server/api/trpc";
-import { posTable, storeTable } from "@/server/db/schema";
+import { posTable } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { type SQL, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const posRouter = createTRPCRouter({

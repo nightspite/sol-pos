@@ -20,15 +20,15 @@ const main = async () => {
   const [createdStore] = await db.insert(storeTable).values({
     name: "Store #1",
   }).returning();
-  const [createdPos] = await db.insert(posTable).values({
+  await db.insert(posTable).values({
     name: "POS #1",
     storeId: createdStore?.id ?? "",
   }).returning();
-  const [createdUserToStore1] = await db.insert(userToStoreTable).values({
+  await db.insert(userToStoreTable).values({
     userId: createdCashier?.id ?? "",
     storeId: createdStore?.id ?? "",
   }).returning();
-  const [createdUser1ToStore2] = await db.insert(userToStoreTable).values({
+  await db.insert(userToStoreTable).values({
     userId: createdAdmin?.id ?? "",
     storeId: createdStore?.id ?? "",
   }).returning();
@@ -50,7 +50,7 @@ const main = async () => {
     name: "Product #4",
     price: 4,
   }).returning();
-  const [createdProduct5] = await db.insert(productTable).values({
+  await db.insert(productTable).values({
     name: "Product #5",
     price: 5,
   }).returning();

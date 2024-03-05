@@ -7,7 +7,7 @@ import {
 import { userTable } from "@/server/db/schema";
 import { hashPassword } from "@/lib/hash";
 import { TRPCError } from "@trpc/server";
-import { type SQL, and, desc, eq, sql } from "drizzle-orm";
+import { type SQL, desc, eq, sql } from "drizzle-orm";
 import { createUserSchema, updateMeSchema, updateUserSchema } from "@/schemas/user";
 import { z } from "zod";
 
@@ -56,6 +56,7 @@ export const userRouter = createTRPCRouter({
         });
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = createdUser;
       return { ...rest };
     }),
@@ -122,6 +123,7 @@ export const userRouter = createTRPCRouter({
         });
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = createdUser;
       return { ...rest };
     }),

@@ -1,7 +1,5 @@
 import { getServerAuthSession } from "@/server/auth";
 import { FullscreenMessage } from "../components/fullscreen-message";
-import { Navbar } from "../components/navbar";
-import { FULL_HEIGHT } from "@/lib/constants";
 
 export default async function Layout({
   children,

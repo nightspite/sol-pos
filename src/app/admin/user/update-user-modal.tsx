@@ -12,11 +12,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import {
-  USER_ROLE_ARRAY,
-  createUserSchema,
-  updateUserSchema,
-} from "@/schemas/user";
+import { USER_ROLE_ARRAY, updateUserSchema } from "@/schemas/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

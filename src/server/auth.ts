@@ -9,7 +9,6 @@ import { env } from "@/env";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { hashPassword } from "@/lib/hash";
-import { api } from "@/trpc/server";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -94,6 +93,7 @@ export const authOptions: NextAuthOptions = {
         // return null;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = user;
 
       return {
