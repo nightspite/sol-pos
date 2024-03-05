@@ -46,11 +46,11 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
     label: "Admin",
     href: FRONTEND_ROUTES.ADMIN,
     children: [
-      {
-        label: "General",
-        href: FRONTEND_ROUTES.ADMIN,
-        description: "General admin settings",
-      },
+      // {
+      //   label: "General",
+      //   href: FRONTEND_ROUTES.ADMIN,
+      //   description: "General admin settings",
+      // },
       {
         label: "Manage Users",
         href: FRONTEND_ROUTES.ADMIN_USER,
@@ -70,11 +70,6 @@ export const ADMIN_MENU_ITEMS: MenuItem[] = [
         label: "View Orders",
         href: FRONTEND_ROUTES.ADMIN_ORDER,
         description: "View and manage orders",
-      },
-      {
-        label: "View Transactions",
-        href: FRONTEND_ROUTES.ADMIN_TRANSACTION,
-        description: "View and manage transactions",
       },
     ],
   },
