@@ -18,7 +18,7 @@ export default async function Layout({
     <div className="relative flex min-h-screen flex-col items-center overflow-hidden">
       <Navbar />
       <div
-        className="relative mx-auto mt-8 w-full max-w-5xl overflow-hidden"
+        className="relative mx-auto w-full max-w-5xl overflow-hidden py-8"
         style={{
           minHeight: FULL_HEIGHT,
         }}

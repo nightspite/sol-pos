@@ -31,7 +31,6 @@ export default async function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          // "bg-gradient-to-br from-green-50 to-green-200",
           inter.variable,
         )}
       >
