@@ -24,3 +24,13 @@ pnpm dev
 pnpm build
 pnpm start
 ```
+
+
+## Credentials
+You can use Admin account to access the admin panel and the POS system.
+- Admin
+  - username: admin
+  - password: admin
+- Cashier
+  - username: cashier
+  - password: cashier
