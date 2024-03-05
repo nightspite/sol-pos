@@ -53,11 +53,13 @@ export default function Page({
           <CardTitle>
             {data?.name}
 
-            <UpdateStoreModal id={data?.id}>
-              <Button size="icon" variant="ghost">
-                <PencilIcon size={16} />
-              </Button>
-            </UpdateStoreModal>
+            {data?.id ? (
+              <UpdateStoreModal id={data?.id}>
+                <Button size="icon" variant="ghost">
+                  <PencilIcon size={16} />
+                </Button>
+              </UpdateStoreModal>
+            ) : null}
           </CardTitle>
           <CardDescription>{data?.id}</CardDescription>
         </CardHeader>

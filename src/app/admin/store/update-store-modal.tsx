@@ -12,7 +12,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import { createStoreSchema, type updateStoreSchema } from "@/schemas/store";
+import { createStoreSchema, updateStoreSchema } from "@/schemas/store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -28,14 +28,14 @@ import { PlusIcon } from "lucide-react";
 import { Input } from "@/app/components/ui/input";
 import { toast } from "sonner";
 
-interface DeleteStoreModalProps {
-  id?: string;
+interface UpdateStoreModalProps {
+  id: string;
   children: React.ReactNode;
 }
 
 type FormType = z.infer<typeof updateStoreSchema>;
 
-export function UpdateStoreModal({ id, children }: DeleteStoreModalProps) {
+export function UpdateStoreModal({ id, children }: UpdateStoreModalProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = api.useUtils();
@@ -65,7 +65,7 @@ export function UpdateStoreModal({ id, children }: DeleteStoreModalProps) {
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(createStoreSchema),
+    resolver: zodResolver(updateStoreSchema),
     defaultValues: {
       id: data?.id ?? "",
       name: data?.name ?? "",

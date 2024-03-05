@@ -106,6 +106,7 @@ export function CreateProductModal({ children }: CreateProductModalProps) {
                     <Input
                       type="number"
                       step={0.01}
+                      min={0.01}
                       {...field}
                       placeholder="10"
                     />

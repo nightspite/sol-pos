@@ -15,7 +15,7 @@ import { type z } from "zod";
 import {
   USER_ROLE_ARRAY,
   createUserSchema,
-  type updateUserSchema,
+  updateUserSchema,
 } from "@/schemas/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +40,7 @@ import {
 import { toast } from "sonner";
 
 interface UpdateUserModalProps {
-  id?: string;
+  id: string;
   children: React.ReactNode;
 }
 
@@ -76,7 +76,7 @@ export function UpdateUserModal({ id, children }: UpdateUserModalProps) {
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(updateUserSchema),
     defaultValues: {
       id: data?.id ?? "",
       name: data?.name ?? "",
@@ -107,6 +107,8 @@ export function UpdateUserModal({ id, children }: UpdateUserModalProps) {
           <form
             className="space-y-4"
             onSubmit={form.handleSubmit((data) => {
+              console.log(data);
+
               mutate(data);
             })}
           >

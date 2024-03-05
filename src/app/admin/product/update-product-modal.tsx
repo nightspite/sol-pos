@@ -12,10 +12,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { type z } from "zod";
-import {
-  createProductSchema,
-  type updateProductSchema,
-} from "@/schemas/product";
+import { updateProductSchema } from "@/schemas/product";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -32,7 +29,7 @@ import { Input } from "@/app/components/ui/input";
 import { toast } from "sonner";
 
 interface UpdateProductModalProps {
-  id?: string;
+  id: string;
   children: React.ReactNode;
 }
 
@@ -68,7 +65,7 @@ export function UpdateProductModal({ id, children }: UpdateProductModalProps) {
   });
 
   const form = useForm<FormType>({
-    resolver: zodResolver(createProductSchema),
+    resolver: zodResolver(updateProductSchema),
     defaultValues: {
       id: data?.id ?? "",
       name: data?.name ?? "",
@@ -97,7 +94,7 @@ export function UpdateProductModal({ id, children }: UpdateProductModalProps) {
           <form
             className="space-y-4"
             onSubmit={form.handleSubmit((data) => {
-              mutate(data);
+              mutate({ ...data, price: Math.round(data.price * 100) });
             })}
           >
             <FormField
@@ -124,6 +121,7 @@ export function UpdateProductModal({ id, children }: UpdateProductModalProps) {
                     <Input
                       type="number"
                       step={0.01}
+                      min={0.01}
                       {...field}
                       placeholder="10"
                     />
