@@ -402,7 +402,7 @@ export const orderRouter = createTRPCRouter({
     if (sum <= 0) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Order total is 0",
+        message: "Order total isn't positive",
       });
     }
 
